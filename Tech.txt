@@ -1,0 +1,18 @@
+| Part      | Tech/Language       | Why?                                       |
+| --------- | ------------------- | ------------------------------------------ |
+| Frontend  | HTML, CSS, JS       | For structure, styling, and interactivity  |
+| Framework | Flask (Python)      | To build the backend server                |
+| Database  | SQLite + SQLAlchemy | To store user info, holdings, NAVs         |
+| Charts    | Chart.js (JS)       | To show visual data like fund distribution |
+| Tools     | Bootstrap           | For nice-looking, mobile-friendly UI       |
+
+
+What Is a Virtual Environment?
+
+A virtual environment is like a clean container where you install only the Python packages your project needs. It avoids conflicts with other projects.
+
+
+
+Optional:
+1. hashing password
+2. good css

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard - Mutual Fund Tracker</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      margin: 0;
+      font-weight: 700;
+      color: #222;
+    }
+
+    .logout {
+      background: #ff6b6b;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .logout:hover {
+      background: #ff4c4c;
+    }
+
+    form {
+      background: #fafafa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    input[type="text"], input[type="number"], input[type="date"] {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0 20px 0;
+      border: 1.8px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus {
+      border-color: #0284c7;
+      outline: none;
+    }
+
+    input[type="submit"] {
+      background-color: #0284c7;
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      font-size: 17px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #026aa7;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 15px 20px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+      font-size: 16px;
+    }
+
+    th {
+      background-color: #0284c7;
+      color: white;
+      font-weight: 700;
+    }
+
+    tr:hover {
+      background-color: #f1f9ff;
+    }
+
+    .buttons1 {
+      background-color: #3761d5;
+      color: white;
+      padding: 12px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .buttons1:hover, .buttons1:active {
+      background-color: #0346ff;
+    }
+
+    .buttons2 {
+      background-color: #f44336;
+      color: white;
+      padding: 12px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      border-radius: 12px;
+    }
+
+    .buttons2:hover, .buttons2:active {
+      background-color: red;
+    }
+
+    .chart-container {
+      margin-top: 40px;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    canvas {
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Top bar with welcome and logout -->
+    <div class="top-bar">
+      <h2>Welcome, {{ username }}!</h2>
+      <a class="logout" href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+    <!-- Bar chart -->
+    {% if fund_names and amounts %}
+    <div class="chart-container">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>Investment Summary (Bar Chart)</h3>
+        <button onclick="toggleTablePopup()" class="buttons1">Show Investments</button>
+      </div>
+      <canvas id="fundChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const fundNames = JSON.parse('{{ fund_names | tojson | safe }}');
+      const fundAmounts = JSON.parse('{{ amounts | tojson | safe }}');
+
+      const ctx = document.getElementById('fundChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: fundNames,
+          datasets: [{
+            label: 'Amount Invested',
+            data: fundAmounts,
+            backgroundColor: '#0284c7'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    </script>
+    {% endif %}
+
+    <!-- Add Fund Form -->
+    <h3>Add Mutual Fund Entry</h3>
+    <form method="POST" action="{{ url_for('dashboard') }}">
+      <input type="text" name="fund_name" placeholder="Fund Name" required>
+      <input type="number" name="amount" placeholder="Amount Invested" step="0.01" required>
+      <input type="date" name="date" required>
+      <input type="submit" value="Add Fund">
+    </form>
+
+    <!-- Investment Table (initially hidden) -->
+    <div id="investmentPopup" style="display:none; margin-top: 20px;">
+      {% if funds %}
+      <table>
+        <thead>
+          <tr>
+            <th>Fund Name</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fund in funds %}
+          <tr>
+            <td>{{ fund['fund_name'] }}</td>
+            <td>{{ fund['amount'] }}</td>
+            <td>{{ fund['date'] }}</td>
+            <td>
+              <a href="{{ url_for('edit_fund', fund_id=fund['id']) }}" class="buttons1">Edit</a>
+              <a href="{{ url_for('delete_fund', fund_id=fund['id']) }}" class="buttons2">Delete</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>No mutual fund entries yet.</p>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <script>
+    function toggleTablePopup() {
+      const popup = document.getElementById('investmentPopup');
+      popup.style.display = (popup.style.display === 'none' || popup.style.display === '') ? 'block' : 'none';
+    }
+  </script>
+</body>
+</html>

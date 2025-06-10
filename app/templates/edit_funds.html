@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Fund Entry</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background-color: #f9f9f9;
+        }
+        form {
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        input[type="text"], input[type="number"], input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        input[type="submit"], a {
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #0284c7;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        a {
+            background-color: grey;
+        }
+    </style>
+</head>
+<body>
+    <h2>Edit Fund Entry</h2>
+    <form method="POST" action="{{ url_for('edit_fund', fund_id=fund['id']) }}">
+        <input type="text" name="fund_name" value="{{ fund['fund_name'] }}" required>
+        <input type="number" name="amount" value="{{ fund['amount'] }}" required>
+        <input type="date" name="date" value="{{ fund['date'] }}" required>
+        <input type="submit" value="Update">
+        <a href="{{ url_for('dashboard') }}">Cancel</a>
+    </form>
+</body>
+</html>
