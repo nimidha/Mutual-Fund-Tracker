@@ -1,5 +1,7 @@
 from flask import Flask, flash, session, request, render_template, redirect, url_for
 import sqlite3
+from flask import Response
+import csv,sys, io
 
 def create_app():
     app = Flask(__name__)
@@ -141,6 +143,7 @@ def create_app():
         #Chart data
         fund_names = [fund['fund_name'] for fund in funds]
         amounts = [fund ['amount'] for fund in funds]
+        dates = [fund['date'] for fund in funds]
 
         #summary stats
         total_entries = len(funds)
@@ -148,7 +151,19 @@ def create_app():
 
        
 
-        return render_template('dashboard.html', username=username, funds=funds, total_entries=total_entries, total_amount=total_amount, fund_names=fund_names, amounts=amounts)
+        return render_template('dashboard.html', username=username, funds=funds, total_entries=total_entries, total_amount=total_amount, fund_names=fund_names, amounts=amounts, dates=dates)
+    
+
+
+    @app.route('/investments')
+    def show_investments():
+        if 'username' not in session:
+            return redirect(url_for('login'))
+        conn = get_db_connection()
+        username = session['username']
+        funds = conn.execute('SELECT * FROM funds WHERE username = ?', (username,)).fetchall()
+        conn.close()
+        return render_template('investments.html', funds=funds, username=username )
 
 
     @app.route('/edit_fund/<int:fund_id>', methods=['GET','POST'])
@@ -198,9 +213,100 @@ def create_app():
         conn.commit()
         conn.close()
         return redirect(url_for('dashboard'))
+    
+
+
+
+    @app.route('/export_csv')
+    def export_csv():
+        if 'username' not in session:
+            return redirect(url_for('login'))
+        
+        username = session['username']
+        print(f"Session username: {username}", file=sys.stdout)
+        conn = get_db_connection()
+        cursor = conn.execute('SELECT fund_name, amount, date FROM funds WHERE username =?', (username,))
+        funds = cursor.fetchall()
+        conn.close()
+        print(f"Fetched rows: {len(funds)}", file=sys.stdout)     # 🔍 Number of rows
+        print(f"Rows: {funds}", file=sys.stdout)   
+
+        def generate():
+            data = io.StringIO()
+            writer = csv.writer(data)
+
+            #HEADER
+            writer.writerow(('Fund Name', 'Amount Invested', 'Date'))
+            yield data.getvalue()
+            data.seek(0)
+            data.truncate(0)
+
+
+            #data rows
+            for row in funds:
+                writer.writerow((row['fund_name'], row['amount'], row['date']))
+                yield data.getvalue()
+                data.seek(0)
+                data.truncate(0)
+
+        headers = {
+        'Content-Disposition': 'attachment; filename="investments.csv"',
+        'Content-Type': 'text/csv',
+        }
+        
+
+        return Response(generate(), headers=headers)
+    
+
+
+
+    @app.route('/upload_csv', methods=['POST'])
+    def upload_csv():
+        if 'username' not in session:
+            redirect(url_for('login'))
+
+
+        file = request.files.get('file')
+        if not file or file.filename=='':
+            return "No file selected", 400
+        
+
+        username = session['username']
+        stream = io.StringIO(file.stream.read().decode("UTF-8"), newline=None)
+        csv_input = csv.reader(stream)
+
+        #Skip header
+
+        next(csv_input)
+
+        conn=get_db_connection()
+        cursor = conn.cursor()
+
+        try:
+            for row in csv_input:
+                fund_name, amount, date=row
+                cursor.execute(
+                    'INSERT INTO funds (fund_name, amount,date, username) VALUES (?,?,?,?)',
+                    (fund_name.strip(), float(amount), date.strip(), username)
+
+                )
+                conn.commit()
+                message = "Investments upload successfully!"
+        except Exception as e:
+            conn.rollback()
+            message =f"Error uploadimg: {e}"
+
+        finally:
+            conn.close()
+
+        return redirect(url_for('show_investments'))
+    
 
 
     return app
+
+
+  
 
 if __name__ == '__main__':
     app = create_app()

@@ -11,13 +11,15 @@
         form {
             max-width: 400px;
             background: white;
-            padding: 20px;
+            padding: 30px;
+            
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         input[type="text"], input[type="number"], input[type="date"] {
-            width: 100%;
-            padding: 10px;
+            width: 380px;
+            padding: 8px;
+           
             margin-bottom: 10px;
         }
         input[type="submit"], a {
@@ -33,6 +35,20 @@
         a {
             background-color: grey;
         }
+
+        body.dark {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+}
+
+body.dark table {
+  background-color: #fdfcfc;
+  color: rgb(15, 15, 15);
+}
+
+body.dark form{
+    box-shadow: 0 4px 15px rgba(250, 243, 243, 0.948);
+}
     </style>
 </head>
 <body>
@@ -44,5 +60,13 @@
         <input type="submit" value="Update">
         <a href="{{ url_for('dashboard') }}">Cancel</a>
     </form>
+    <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark');
+    }
+  });
+</script>
 </body>
 </html>

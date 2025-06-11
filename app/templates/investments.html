@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your Investments - Mutual Fund Tracker</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #e5ecf3;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 50px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(40, 36, 36, 0.948);
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin: 0;
+      font-weight: 700;
+      color: #222;
+    }
+
+    .back-btn {
+      background: #0284c7;
+      color: white !important;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: #026aa7;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 15px 20px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+      font-size: 16px;
+    }
+
+    th {
+      background-color: #0284c7;
+      color: white;
+      font-weight: 700;
+    }
+
+    tr:hover {
+      background-color: #f1f9ff;
+    }
+
+    .buttons1 {
+      background-color: #3761d5;
+      color: white !important;
+      padding: 10px 16px;
+      text-align: center;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .buttons1:hover {
+      background-color: #0346ff;
+    }
+
+    .buttons2 {
+      background-color: #f44336;
+      color: white !important;
+      padding: 10px 16px;
+      text-align: center;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .buttons2:hover {
+      background-color: #d32f2f;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 40px 0;
+      font-size: 18px;
+      color: #777;
+    }
+
+    body.dark .container {
+  background-color: #f9f8f8;
+  box-shadow: 0 4px 15px rgba(250, 243, 243, 0.948);
+  
+}
+
+
+    body.dark {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+}
+
+body.dark table {
+  background-color: #fdfcfc;
+  color: rgb(15, 15, 15);
+}
+
+body.dark th,
+body.dark td {
+  border-color: #666;
+}
+
+body.dark a {
+  color: #60a5fa;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar">
+      <h2>Your Investments</h2>
+      <a href="{{ url_for('export_csv') }}" class="buttons1">📁 Export CSV</a>
+      
+
+      <a href="{{ url_for('dashboard') }}" class="back-btn">← Back to Dashboard</a>
+    </div>
+
+    {% if funds %}
+    <table>
+      <thead>
+        <tr>
+          <th>Fund Name</th>
+          <th>Amount</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fund in funds %}
+        <tr>
+          <td>{{ fund['fund_name'] }}</td>
+          <td>{{ fund['amount'] }}</td>
+          <td>{{ fund['date'] }}</td>
+          <td>
+            <a href="{{ url_for('edit_fund', fund_id=fund['id']) }}" class="buttons1">Edit</a>
+            <a href="{{ url_for('delete_fund', fund_id=fund['id']) }}" class="buttons2">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="no-data">You have not added any investments yet.</div>
+    {% endif %}
+  </div>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark');
+    }
+  });
+</script>
+
+</body>
+</html>

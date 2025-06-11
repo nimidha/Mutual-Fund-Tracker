@@ -5,26 +5,26 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f0f4f8;
+      background: #e5ecf3;
       margin: 0;
-      padding: 20px;
+      padding: 0;
       color: #333;
     }
 
     .container {
       max-width: 900px;
-      margin: 0 auto;
+      margin: 50px auto;
       background: white;
       padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
     }
 
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 30px;
     }
 
     h2 {
@@ -36,40 +36,126 @@
     .logout {
       background: #ff6b6b;
       color: white;
-      padding: 8px 15px;
+      padding: 8px 16px;
       border-radius: 6px;
       text-decoration: none;
       font-weight: 600;
+      transition: background 0.3s ease;
     }
 
     .logout:hover {
       background: #ff4c4c;
     }
 
-    form {
-      background: #fafafa;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 30px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    .button-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
     }
 
-    input[type="text"], input[type="number"], input[type="date"] {
+    .buttons1, .buttons2 {
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      color: white;
+      text-decoration: none;
+    }
+
+    .buttons1 {
+      background-color: #0284c7;
+    }
+
+    .buttons2 {
+      background-color: #22c55e !important;
+    }
+
+    .buttons1:hover {
+      background-color: #026aa7;
+    }
+
+    .buttons2:hover {
+      background-color: #16a34a !important;
+    }
+
+    .chart-container {
+      margin-top: 40px;
+      padding: 20px;
+      background: #ffffff;
+      font-weight: 100;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgb(136, 130, 130);
+      max-height: 300px;
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+      display: block;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 8% auto;
+      padding: 30px;
+      border: 1px solid #ddd;
+      width: 90%;
+      max-width: 500px;
+      border-radius: 14px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.2);
+      animation: slideDown 0.4s ease;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+      color: #0284c7;
+    }
+
+    .modal-content input[type="text"],
+    .modal-content input[type="number"],
+    .modal-content input[type="date"] {
       width: 100%;
-      padding: 12px 15px;
-      margin: 10px 0 20px 0;
+      padding: 12px 1px;
+      margin: 10px 0 25px 0;
       border: 1.8px solid #ddd;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 16px;
       transition: border-color 0.3s ease;
     }
 
-    input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus {
+    .modal-content input[type="text"]:focus,
+    .modal-content input[type="number"]:focus,
+    .modal-content input[type="date"]:focus {
       border-color: #0284c7;
       outline: none;
     }
 
-    input[type="submit"] {
+    .modal-content input[type="submit"] {
       background-color: #0284c7;
       color: white;
       padding: 12px 30px;
@@ -81,104 +167,153 @@
       transition: background-color 0.3s ease;
     }
 
-    input[type="submit"]:hover {
+    .modal-content input[type="submit"]:hover {
       background-color: #026aa7;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
     }
 
-    th, td {
-      padding: 15px 20px;
-      text-align: left;
-      border-bottom: 1px solid #eee;
-      font-size: 16px;
-    }
-
-    th {
-      background-color: #0284c7;
-      color: white;
-      font-weight: 700;
-    }
-
-    tr:hover {
-      background-color: #f1f9ff;
-    }
-
-    .buttons1 {
-      background-color: #3761d5;
-      color: white;
-      padding: 12px 20px;
-      text-align: center;
+    .close:hover,
+    .close:focus {
+      color: black;
       text-decoration: none;
-      display: inline-block;
-      border-radius: 12px;
-      border: none;
       cursor: pointer;
     }
 
-    .buttons1:hover, .buttons1:active {
-      background-color: #0346ff;
+    /* Dark Theme Styling */
+    body.dark {
+      background-color: #1e1e1e;
+      color: #f0f0f0;
     }
 
-    .buttons2 {
-      background-color: #f44336;
-      color: white;
-      padding: 12px 20px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      border-radius: 12px;
+    body.dark .container,
+    body.dark .chart-container {
+      background-color: #2c2c2c;
+      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
     }
 
-    .buttons2:hover, .buttons2:active {
-      background-color: red;
+    body.dark h2,
+    body.dark h3,
+    body.dark label,
+    body.dark .logout,
+    body.dark .buttons1,
+    body.dark .buttons2 {
+      color: #ffffff !important;
     }
 
-    .chart-container {
-      margin-top: 40px;
-      padding: 20px;
-      background: #ffffff;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    body.dark .logout {
+      background: #ff4c4c;
+    }
+    /* 🔒 Fully freeze popup in light mode (even in dark theme) */
+body.dark .light-popup,
+body.dark .light-popup *,
+body.dark .light-popup input,
+body.dark .light-popup input::placeholder,
+body.dark .light-popup textarea,
+body.dark .light-popup select,
+body.dark .light-popup h3,
+body.dark .light-popup label,
+body.dark .light-popup button,
+body.dark .light-popup input[type="submit"] {
+  background-color: #fff !important;
+  color: #222 !important;
+  border-color: #ccc !important;
+  box-shadow: none !important;
+}
+
+/* Ensure submit button inside modal stays blue with white text */
+body.dark .light-popup input[type="submit"] {
+  background-color: #0284c7 !important;
+  color: #fff !important;
+}
+
+
+    
+
+   body.dark .container input,
+body.dark .container textarea,
+body.dark .container select,
+body.dark .container button,
+body.dark .container input::placeholder,
+body.dark .container h3,
+body.dark .container label
+ {
+      background-color: #333;
+      color: #fff;
+      border-color: #666;
     }
 
-    canvas {
-      max-width: 100%;
+    /* Theme Toggle Button */
+    #themeToggleBtn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 999;
     }
   </style>
 </head>
 <body>
+
+  <button id="themeToggleBtn">🌙</button>
+
   <div class="container">
-    <!-- Top bar with welcome and logout -->
     <div class="top-bar">
       <h2>Welcome, {{ username }}!</h2>
       <a class="logout" href="{{ url_for('logout') }}">Logout</a>
     </div>
 
-    <!-- Bar chart -->
-    {% if fund_names and amounts %}
-    <div class="chart-container">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3>Investment Summary (Bar Chart)</h3>
-        <button onclick="toggleTablePopup()" class="buttons1">Show Investments</button>
-      </div>
-      <canvas id="fundChart"></canvas>
+    <div class="button-bar">
+      <a href="{{ url_for('show_investments') }}" class="buttons1">Show Investments</a>
+      <button class="buttons2" onclick="document.getElementById('investmentModal').style.display='block'">➕ New Investment</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
+    {% if fund_names and amounts %}
+    <div class="chart-container">
+      <h3>Investment Summary (Bar Chart)</h3>
+      <canvas id="fundChart"></canvas>
+    </div>
+    {% endif %}
+
+    <!-- Modal for New Investment -->
+    <div id="investmentModal" class="modal">
+      <div class="modal-content  light-popup">
+        <span class="close" onclick="document.getElementById('investmentModal').style.display='none'">&times;</span>
+        <h3>Add Mutual Fund Entry</h3>
+        <form method="POST" action="{{ url_for('dashboard') }}">
+          <input type="text" name="fund_name" placeholder="Fund Name" required>
+          <input type="number" name="amount" placeholder="Amount Invested" step="0.01" required>
+          <input type="date" name="date" required>
+          <input type="submit" value="Add Fund">
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart.js & Toggle Script -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const toggleBtn = document.getElementById('themeToggleBtn');
+    let chart;
+
+    function renderChart() {
       const fundNames = JSON.parse('{{ fund_names | tojson | safe }}');
       const fundAmounts = JSON.parse('{{ amounts | tojson | safe }}');
-
+      const fundDates = JSON.parse('{{ dates | tojson | safe }}');
+      const isDark = document.body.classList.contains('dark');
       const ctx = document.getElementById('fundChart').getContext('2d');
-      new Chart(ctx, {
+
+      if (chart) chart.destroy();
+
+      chart = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: fundNames,
@@ -190,67 +325,60 @@
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
-            legend: {
-              display: false
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const index = context.dataIndex;
+                  const date = fundDates[index];
+                  return `₹${context.parsed.y} on ${date}`;
+                }
+              }
             }
           },
           scales: {
             y: {
-              beginAtZero: true
+              beginAtZero: true,
+              ticks: { color: isDark ? '#fff' : '#000' }
+            },
+            x: {
+              ticks: { color: isDark ? '#fff' : '#000' }
             }
           }
         }
       });
-    </script>
-    {% endif %}
+    }
 
-    <!-- Add Fund Form -->
-    <h3>Add Mutual Fund Entry</h3>
-    <form method="POST" action="{{ url_for('dashboard') }}">
-      <input type="text" name="fund_name" placeholder="Fund Name" required>
-      <input type="number" name="amount" placeholder="Amount Invested" step="0.01" required>
-      <input type="date" name="date" required>
-      <input type="submit" value="Add Fund">
-    </form>
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        toggleBtn.textContent = '☀️';
+      }
 
-    <!-- Investment Table (initially hidden) -->
-    <div id="investmentPopup" style="display:none; margin-top: 20px;">
-      {% if funds %}
-      <table>
-        <thead>
-          <tr>
-            <th>Fund Name</th>
-            <th>Amount</th>
-            <th>Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for fund in funds %}
-          <tr>
-            <td>{{ fund['fund_name'] }}</td>
-            <td>{{ fund['amount'] }}</td>
-            <td>{{ fund['date'] }}</td>
-            <td>
-              <a href="{{ url_for('edit_fund', fund_id=fund['id']) }}" class="buttons1">Edit</a>
-              <a href="{{ url_for('delete_fund', fund_id=fund['id']) }}" class="buttons2">Delete</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <p>No mutual fund entries yet.</p>
-      {% endif %}
-    </div>
+      if (document.getElementById('fundChart')) {
+        renderChart();
+      }
 
-  </div>
+      toggleBtn.addEventListener('click', () => {
+        document.body.classList.toggle('dark');
+        const isDark = document.body.classList.contains('dark');
+        toggleBtn.textContent = isDark ? '☀️' : '🌙';
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        if (document.getElementById('fundChart')) {
+          renderChart();
+        }
+      });
+    });
 
-  <script>
-    function toggleTablePopup() {
-      const popup = document.getElementById('investmentPopup');
-      popup.style.display = (popup.style.display === 'none' || popup.style.display === '') ? 'block' : 'none';
+    // Close modal on outside click
+    window.onclick = function(event) {
+      const modal = document.getElementById('investmentModal');
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
     }
   </script>
 </body>
