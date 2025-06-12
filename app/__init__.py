@@ -1,6 +1,6 @@
 from flask import Flask, flash, session, request, render_template, redirect, url_for
 import sqlite3
-from flask import Response
+from flask import Response, jsonify
 import csv,sys, io
 
 def create_app():
@@ -301,6 +301,124 @@ def create_app():
 
         return redirect(url_for('show_investments'))
     
+   
+
+    @app.route('/api/investments', methods=['GET'])
+    def api_get_investmnets():
+        if 'username' not in session:
+            return jsonify({'error':'Unauthorized'}), 401
+        
+
+        username = session['username']
+        conn = get_db_connection()
+        cursor = conn.execute('SELECT id, fund_name, amount, date FROM funds WHERE username = ?', (username,))
+        investments = cursor.fetchall()
+        conn.close()
+
+
+        #convert row objects to python dictionaries
+        investment_list =[]
+        for row in investments:
+            investment_list.append({
+                'id': row['id'],
+                'fund_name': row['fund_name'],
+                'amount':row['amount'],
+                'date': row['date']
+            })
+
+        return jsonify({'investmnets': investment_list})
+
+    @app.route('/api/investments', methods=['POST'])
+    def api_add_investments():
+        if 'username' not in session:
+            return jsonify({'error':'Unauthorized'}), 401
+
+
+        username= session['nimidhag']
+
+        #parse json input
+        data = request.get_json()
+
+        #validate required field
+        required_fields = ['fund_name', 'amount', 'date']
+        if not all (field in data for field in required_fields):
+            return jsonify({'error': 'Missing field in request'}) , 400
+        
+
+        #Extract and sanitize values 
+        fund_name = data['fund_name'].strip()
+        try:
+            amount = float(data['amount'])
+        except ValueError:
+            return jsonify({'error': 'Amount must be a number'}), 400
+        date= data['date'].strip()
+
+        #insert into db
+
+        try:
+            conn = get_db_connection()
+            conn.execute(
+                'INSERT INTO funds (fund_name, amount, date, username) VALUES (?,?,?,?)',
+                (fund_name, amount, date ,username)
+            )
+            conn.commit()
+            conn.close()
+            return jsonify({'message': 'Investmnet added successfully'}), 201
+        except Exception as e:
+            return jsonify({'error': f'Database error: {e}'}), 500
+
+    @app.route('/api/investments/<int:fund_id>', methods=['PUT'])
+    def api_put_investments(fund_id):
+        if 'username' not in session:
+            return jsonify({'error':'Unauthorized'}),401
+        
+        username = session['username']
+        data=request.get_json()
+
+
+        required_fields = ['fund_name', 'amount', 'date']
+        if not all (field in data for field in required_fields):
+            return jsonify({'error':'Missing field in request'}), 400
+        
+
+        try:
+            conn = get_db_connection()
+            conn.execute(
+                'UPDATE funds SET fund_name =?,amount=?, date=? WHERE id =? AND username=?',
+                (data['fund_name'], float(data['amount']), data['date'], fund_id,username)
+            )
+            conn.commit()
+            conn.close()
+            return jsonify({'message': 'Investment updated successfully'}), 200
+        except Exception as e:
+            return jsonify({'error': f'Database error: {e}'}), 500
+
+      
+    @app.route('/api/investments/<int:fund_id>', methods=['DELETE'])
+    def delete_investment(fund_id):
+        if 'username' not in session:
+            return jsonify({'error': 'Unauthorized'}), 401
+        
+        username = session['username']
+
+        try:
+            conn = get_db_connection()
+            conn.execute(
+            'DELETE FROM funds WHERE id=? AND username=?',
+            (fund_id, username)
+        )
+            conn.commit()
+            conn.close()
+        
+            return jsonify({'message': 'Investment deleted successfully'}), 200
+        except Exception as e:
+            return jsonify({'error': f'Database error: {e}'}), 500
+
+
+
+    
+
+        
 
 
     return app

@@ -12,6 +12,16 @@ What Is a Virtual Environment?
 A virtual environment is like a clean container where you install only the Python packages your project needs. It avoids conflicts with other projects.
 
 
+REST (Representational State Transfer) is a set of rules that define how web services should communicate. A REST API allows clients (like your frontend) to send requests to a server and get data back in a standard format (usually JSON).
+
+Why use a REST API?
+
+    Separates backend logic from frontend
+
+    Makes data accessible via URLs (/api/data)
+
+    Useful for frontend apps, mobile apps, or third-party services
+
 
 Optional:
 1. hashing password
