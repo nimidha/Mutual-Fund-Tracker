@@ -2,6 +2,9 @@ from flask import Flask, flash, session, request, render_template, redirect, url
 import sqlite3
 from flask import Response, jsonify
 import csv,sys, io
+from app.utils import get_mutual_fund_names
+from collections import defaultdict
+from datetime import datetime
 
 def create_app():
     app = Flask(__name__)
@@ -140,18 +143,35 @@ def create_app():
         conn.close()
         
 
-        #Chart data
+        # # Chart Data - show each fund individually
         fund_names = [fund['fund_name'] for fund in funds]
-        amounts = [fund ['amount'] for fund in funds]
-        dates = [fund['date'] for fund in funds]
+        amounts = [fund['amount'] for fund in funds]
+       
 
         #summary stats
         total_entries = len(funds)
-        total_amount = sum(amounts)
+        total_amount = sum(fund['amount'] for fund in funds)
+         
 
-       
 
-        return render_template('dashboard.html', username=username, funds=funds, total_entries=total_entries, total_amount=total_amount, fund_names=fund_names, amounts=amounts, dates=dates)
+          # Prepare data for chart: Group by fund_name
+        fund_totals = defaultdict(float)
+        for fund in funds:
+           fund_totals[fund['fund_name']] += fund['amount']
+
+        fund_labels = list(fund_totals.keys())
+        fund_amounts = list(fund_totals.values())
+
+        fund_options = get_mutual_fund_names()
+
+        return render_template('dashboard.html',
+        username=username,
+        funds=funds,
+        total_entries=total_entries,
+        total_amount=total_amount,
+        fund_labels=fund_labels,              # ✅ Add this
+        fund_amounts=fund_amounts ,
+        fund_options=fund_options)
     
 
 
@@ -206,12 +226,12 @@ def create_app():
             redirect(url_for('login'))
 
         username=session['username']
-        conn=get_db_connection()
-        cursor=conn.cursor()
+        with get_db_connection() as conn:
+            cursor=conn.cursor()
 
-        cursor.execute("DELETE FROM funds WHERE username = ? AND id = ?",(username,fund_id))
-        conn.commit()
-        conn.close()
+            cursor.execute("DELETE FROM funds WHERE username = ? AND id = ?",(username,fund_id))
+            conn.commit()
+        
         return redirect(url_for('dashboard'))
     
 
